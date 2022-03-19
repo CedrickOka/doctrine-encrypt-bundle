@@ -65,7 +65,7 @@ class Foo
     
     /**
      * #[ORM\Column(type: Types::TEXT)]
-     * #[ORM\Encrypt(algorithm: 'aes256')]
+     * #[Encrypt(algorithm: 'aes256')]
      *
      * @var string
      */
