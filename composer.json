@@ -34,7 +34,7 @@
 		"doctrine/orm": "^2.11",
 		"symfony/framework-bundle": "^4.4 || ^5.4",
 		"symfony/phpunit-bridge": "^4.4 || ^5.4",
-		"symfony/proxy-manager-bridge": "^4.4",
+		"symfony/proxy-manager-bridge": "^4.4 || ^5.4",
 		"symfony/yaml": "^4.4 || ^5.4"
 	},
 	"config" : {

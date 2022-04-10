@@ -12,10 +12,12 @@ use Oka\Doctrine\EncryptBundle\Annotation\Encrypt;
 abstract class AbstractDoctrineListener
 {
     private array $encryptedObjects;
+    private array $encryptedProperties;
 
     public function __construct(private string $secret = '')
     {
         $this->encryptedObjects = [];
+        $this->encryptedProperties = [];
     }
 
     public function postFlush(EventArgs $args)
@@ -24,16 +26,16 @@ abstract class AbstractDoctrineListener
             return;
         }
 
-        foreach ($this->encryptedObjects as $object => $encryptedProperties) {
+        foreach ($this->encryptedObjects as $class => $object) {
             $reflObject = new \ReflectionObject($object);
 
-            foreach ($encryptedProperties as $key => $value) {
+            foreach ($this->encryptedProperties[$class] as $propertyName => $propertyValue) {
                 /** @var \ReflectionProperty $reflProperty */
-                $reflProperty = $reflObject->getProperty($key);
-                $reflProperty->setValue($object, $value);
+                $reflProperty = $reflObject->getProperty($propertyName);
+                $reflProperty->setValue($object, $propertyValue);
             }
 
-            unset($this->encryptedObjects[$object]);
+            unset($this->encryptedObjects[$object::class], $this->encryptedProperties[$object::class]);
         }
     }
 
@@ -44,63 +46,60 @@ abstract class AbstractDoctrineListener
 
         /** @var \ReflectionProperty $reflProperty */
         foreach ($reflObject->getProperties() as $reflProperty) {
+            if (!$value = $reflProperty->getValue($object)) {
+                continue;
+            }
+
             $attributes = $reflProperty->getAttributes(Encrypt::class);
 
             if (true === empty($attributes)) {
                 continue;
             }
 
-            /** @var \ReflectionAttribute $attributes[0] */
-            $arguments = $attributes[0]->getArguments();
-
-            if (!$value = $reflProperty->getValue($object)) {
-                continue;
-            }
-
-            $reflProperty->setValue($object, $this->decrypt($value, $arguments['algorithm']));
+            /** @var \Oka\Doctrine\EncryptBundle\Annotation\Encrypt $encryptAttribute */
+            $encryptAttribute = $attributes[0]->newInstance();
+            $reflProperty->setValue($object, $this->decrypt($value, $encryptAttribute->algorithm, $encryptAttribute->initializationVector));
         }
     }
 
     protected function encryptOnFlush(object $object): bool
     {
-        $encryptedProperties = [];
         $reflObject = new \ReflectionObject($object);
 
         /** @var \ReflectionProperty $reflProperty */
         foreach ($reflObject->getProperties() as $reflProperty) {
+            if (!$value = $reflProperty->getValue($object)) {
+                continue;
+            }
+
             $attributes = $reflProperty->getAttributes(Encrypt::class);
 
             if (true === empty($attributes)) {
                 continue;
             }
 
-            /** @var \ReflectionAttribute $attributes[0] */
-            $arguments = $attributes[0]->getArguments();
-
-            if (!$value = $reflProperty->getValue($object)) {
-                continue;
-            }
-
-            $encryptedProperties[$reflProperty->getName()] = $value;
-            $reflProperty->setValue($object, $this->encrypt($value, $arguments['algorithm']));
+            /** @var \Oka\Doctrine\EncryptBundle\Annotation\Encrypt $encryptAttribute */
+            $encryptAttribute = $attributes[0]->newInstance();
+            $this->encryptedProperties[$object::class][$reflProperty->getName()] = $value;
+            $reflProperty->setValue($object, $this->encrypt($value, $encryptAttribute->algorithm, $encryptAttribute->initializationVector));
         }
 
-        if (true === empty($encryptedProperties)) {
+        if (true === empty($this->encryptedProperties[$object::class])) {
             return false;
         }
 
-        $this->encryptedObjects[$object] = $encryptedProperties;
+        $this->encryptedObjects[$object::class] = $object;
 
         return true;
     }
 
-    protected function encrypt(string $value, string $algorithm): string
+    protected function encrypt(string $value, string $algorithm, string $initializationVector): string
     {
-        return base64_encode(openssl_encrypt($value, $algorithm, $this->secret));
+        return base64_encode(openssl_encrypt($value, $algorithm, $this->secret, null, $initializationVector));
     }
 
-    protected function decrypt(string $value, string $algorithm): string
+    protected function decrypt(string $value, string $algorithm, string $initializationVector): string
     {
-        return openssl_decrypt(base64_decode($value), $algorithm, $this->secret);
+        return openssl_decrypt(base64_decode($value), $algorithm, $this->secret, null, $initializationVector);
     }
 }

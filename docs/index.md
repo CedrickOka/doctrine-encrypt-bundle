@@ -23,7 +23,7 @@ Open a command console, enter your project directory and execute the
 following command to download the latest stable version of this bundle:
 
 ```bash
-$ composer require coka/input-handler-bundle
+$ composer require coka/doctrine-encrypt-bundle
 ```
 
 This command requires you to have Composer installed globally, as explained
@@ -57,18 +57,19 @@ use Doctrine\ORM\Mapping as ORM;
 use Oka\Doctrine\EncryptBundle\Annotation\Encrypt;
 
 /**
- * #[ORM\Entity]
+ * 
  */
+#[ORM\Entity]
 class Foo
 {
     // ...
     
     /**
      * #[ORM\Column(type: Types::TEXT)]
-     * #[Encrypt(algorithm: 'aes256')]
      *
      * @var string
      */
+    #[Encrypt(algorithm: 'aes256')]
     protected $secret;
 }
 ``` 
