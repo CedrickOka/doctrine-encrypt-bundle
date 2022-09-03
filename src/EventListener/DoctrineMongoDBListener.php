@@ -12,7 +12,8 @@ class DoctrineMongoDBListener extends AbstractDoctrineListener
 {
     public function onFlush(OnFlushEventArgs $args)
     {
-        $dm = $args->getDocumentManager();
+        /** @var \Doctrine\ODM\MongoDB\DocumentManager $dm */
+        $dm = $args->getObjectManager();
         $unitOfWork = $dm->getUnitOfWork();
 
         foreach ($unitOfWork->getScheduledDocumentInsertions() as $document) {

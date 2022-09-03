@@ -12,7 +12,8 @@ class DoctrineORMListener extends AbstractDoctrineListener
 {
     public function onFlush(OnFlushEventArgs $args)
     {
-        $em = $args->getEntityManager();
+        /** @var \Doctrine\ORM\EntityManagerInterface $em */
+        $em = $args->getObjectManager();
         $unitOfWork = $em->getUnitOfWork();
 
         foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {

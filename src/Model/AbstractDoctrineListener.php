@@ -11,13 +11,8 @@ use Oka\Doctrine\EncryptBundle\Annotation\Encrypt;
  */
 abstract class AbstractDoctrineListener
 {
-    private array $encryptedObjects;
-    private array $encryptedProperties;
-
-    public function __construct(private string $secret = '')
+    public function __construct(private string $secret = '', private array $encryptedObjects = [], private array $encryptedProperties = [])
     {
-        $this->encryptedObjects = [];
-        $this->encryptedProperties = [];
     }
 
     public function postFlush(EventArgs $args)
