@@ -90,11 +90,11 @@ abstract class AbstractDoctrineListener
 
     protected function encrypt(string $value, string $algorithm, string $initializationVector): string
     {
-        return base64_encode(openssl_encrypt($value, $algorithm, $this->secret, null, $initializationVector));
+        return base64_encode(openssl_encrypt($value, $algorithm, $this->secret, \OPENSSL_RAW_DATA, $initializationVector));
     }
 
     protected function decrypt(string $value, string $algorithm, string $initializationVector): string
     {
-        return openssl_decrypt(base64_decode($value), $algorithm, $this->secret, null, $initializationVector);
+        return openssl_decrypt(base64_decode($value), $algorithm, $this->secret, \OPENSSL_RAW_DATA, $initializationVector);
     }
 }
