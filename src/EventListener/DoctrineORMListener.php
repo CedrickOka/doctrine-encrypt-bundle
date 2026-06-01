@@ -10,7 +10,7 @@ use Oka\Doctrine\EncryptBundle\Model\AbstractDoctrineListener;
  */
 class DoctrineORMListener extends AbstractDoctrineListener
 {
-    public function onFlush(OnFlushEventArgs $args)
+    public function onFlush(OnFlushEventArgs $args): void
     {
         /** @var \Doctrine\ORM\EntityManagerInterface $em */
         $em = $args->getObjectManager();

@@ -10,7 +10,7 @@ use Oka\Doctrine\EncryptBundle\Model\AbstractDoctrineListener;
  */
 class DoctrineMongoDBListener extends AbstractDoctrineListener
 {
-    public function onFlush(OnFlushEventArgs $args)
+    public function onFlush(OnFlushEventArgs $args): void
     {
         /** @var \Doctrine\ODM\MongoDB\DocumentManager $dm */
         $dm = $args->getObjectManager();

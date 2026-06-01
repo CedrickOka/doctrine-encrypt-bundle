@@ -27,7 +27,7 @@ class DoctrineListenerPass implements CompilerPassInterface
         ],
     ];
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         foreach (static::$doctrineDrivers as $key => $dbDriver) {
             if (false === $container->hasDefinition($dbDriver['registry'])) {
