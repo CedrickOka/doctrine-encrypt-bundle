@@ -15,7 +15,7 @@ abstract class AbstractDoctrineListener
     {
     }
 
-    public function postFlush(EventArgs $args)
+    public function postFlush(EventArgs $args): void
     {
         if (true === empty($this->encryptedObjects)) {
             return;
@@ -34,7 +34,7 @@ abstract class AbstractDoctrineListener
         }
     }
 
-    public function postLoad(LifecycleEventArgs $args)
+    public function postLoad(LifecycleEventArgs $args): void
     {
         $object = $args->getObject();
         $reflObject = new \ReflectionObject($object);
@@ -51,7 +51,7 @@ abstract class AbstractDoctrineListener
                 continue;
             }
 
-            /** @var \Oka\Doctrine\EncryptBundle\Annotation\Encrypt $encryptAttribute */
+            /** @var Encrypt $encryptAttribute */
             $encryptAttribute = $attributes[0]->newInstance();
             $reflProperty->setValue($object, $this->decrypt($value, $encryptAttribute->algorithm, $encryptAttribute->initializationVector));
         }
@@ -73,7 +73,7 @@ abstract class AbstractDoctrineListener
                 continue;
             }
 
-            /** @var \Oka\Doctrine\EncryptBundle\Annotation\Encrypt $encryptAttribute */
+            /** @var Encrypt $encryptAttribute */
             $encryptAttribute = $attributes[0]->newInstance();
             $this->encryptedProperties[$object::class][$reflProperty->getName()] = $value;
             $reflProperty->setValue($object, $this->encrypt($value, $encryptAttribute->algorithm, $encryptAttribute->initializationVector));
